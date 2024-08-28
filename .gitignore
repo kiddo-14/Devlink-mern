@@ -1,0 +1,54 @@
+# --- General ---
+# Node modules (applies to both frontend and backend)
+node_modules/
+
+# Logs (applies to both frontend and backend)
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Environment variables (applies to both frontend and backend)
+.env
+.env.local
+.env.*.local
+
+# --- Frontend (React) ---
+# Build output directories
+devLinks_React/build/
+devLinks_React/dist/
+
+# ESLint cache
+devLinks_React/.eslintcache
+
+# Coverage directory
+devLinks_React/coverage/
+
+# --- Backend (Node.js) ---
+# Coverage directory
+FileUpload/coverage/
+
+# nyc test coverage
+FileUpload/.nyc_output/
+
+# PIDs (Process IDs)
+FileUpload/pids/
+FileUpload/*.pid
+FileUpload/*.pid.lock
+
+# Optional npm cache directory
+FileUpload/.npm
+
+# --- Editor directories and files (applies to both frontend and backend) ---
+.idea/
+.vscode/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.swp
+
+# --- OS specific files ---
+# MacOS
+.DS_Store
