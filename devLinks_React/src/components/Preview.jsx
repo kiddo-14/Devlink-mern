@@ -31,51 +31,105 @@ const getPlatformColor = (platformName) => {
 const Preview = () => {
     const [profileData, setProfileData] = useState([]);
     const [linkData, setLinkData] = useState({});
+    const [authuserID,setAuthuserid]=useState(null);  
+
+   
 
     useEffect(() => {
-        const fetchUserData = async () => {
-            try {           
-                // Fetch profiles
-                const profileResponse = await fetch(`${BASE_URL}/api/v1/alluser`);
-                if (!profileResponse.ok) {
-                    throw new Error('Failed to fetch user data');
-                }         
-                const profileResult = await profileResponse.json();
-                const profiles = profileResult.data || [];
-                console.log("profiles",profiles);
-                // Fetch links
-                const linkResponse = await fetch(`${BASE_URL}/api/v1/alllinks`);
-                if (!linkResponse.ok) {
-                    throw new Error('Failed to fetch links data');
-                }
-                const linkResult = await linkResponse.json();
-                console.log("links after fetching from link",linkResult);                
-                const links = linkResult.data ;
-                console.log("links",links)
-                // Create a map of link ID to link object
-                const linkMap = links.reduce((acc, link) => {
-                    acc[link._id] = link;
-                    return acc;
-                }, {});
 
-                console.log("result after mapping",linkMap);
+        setAuthuserid(localStorage.getItem("authuserid"));
+        console.log(authuserID);
+       const fetchUserData = async () => {
+           if (!authuserID) return;
 
-                // Map each profile's links from IDs to full link objects
-                const profilesWithLinks = profiles.map(profile => ({
-                    ...profile,
-                    links: profile.links.map(linkId => linkMap[linkId])
-                }));
-                 console.log("profieWithLinks");
-                setProfileData(profilesWithLinks);
+           try {
+               // Pass the id as a query parameter in the URL
+               const response = await fetch(`${BASE_URL}/api/v1/authuserid?id=${authuserID}`, {
+                   method: 'GET', 
+                   headers: {
+                       'Content-Type': 'application/json',
+                       // 'Authorization': 'Bearer '
+                   },
+               });
 
-            } catch (error) {
-                console.error('Error fetching user data:', error);
-                setProfileData([]);
-            }
-        };
-        fetchUserData();
-    }, []);
+               if (!response.ok) {
+                   throw new Error('Failed to fetch user data');
+               }
 
+               const result = await response.json();
+               console.log(result);
+
+               const profiles = result.data.profiles;
+               console.log("profiles",profiles);
+
+               const fetchprofilesForauthUser = async (userId) => {
+                   try {
+                     const response = await fetch(`${BASE_URL}/api/v1/getAllProfilesOfAuthUser?id=${userId}`,{
+                       method: 'GET', 
+                       headers: {
+                           'Content-Type': 'application/json',
+                           // 'Authorization': 'Bearer '
+                       },
+                   });
+                   // console.log("response",response);
+                     const result= await response.json(); 
+                     console.log("result",result);
+                     return result.data;
+                   } catch (error) {
+                     console.error(`Error fetching profile for user ID ${userId}:`, error);
+                   
+                   }
+                 };
+               const fetchlinkdetails = async (linkId) => {
+                   try {
+                     const response = await fetch(`${BASE_URL}/api/v1/getlink?id=${linkId}`,{
+                       method: 'GET', 
+                       headers: {
+                           'Content-Type': 'application/json',
+                           // 'Authorization': 'Bearer '
+                       },
+                   });
+                   // console.log("response",response);
+                     const result= await response.json(); 
+                     console.log("result",result);
+                     return result.data;
+                   } catch (error) {
+                     console.error(`Error fetching link for link ID ${userId}:`, error);
+                   
+                   }
+                 };
+
+
+               
+                 const profiledetailsArr = await Promise.all(
+                   profiles.map(async (userId) => {
+                       const profieldetail = await fetchprofilesForauthUser(userId);
+                        
+                       /********************************************************** */
+                       const profilelinks =profieldetail.links;
+
+                       console.log("profilelinks",profilelinks);
+                             const linkdeatilsArr =await Promise.all(
+                                  profilelinks.map(async(linkId)=>{
+                                     const linkdetail =await fetchlinkdetails(linkId);
+                                      return linkdetail;
+                                  })
+                             )
+                             profieldetail.links=linkdeatilsArr;
+                        /*****************************************************/   
+                       return profieldetail;
+                   })
+               );
+                    setProfileData(profiledetailsArr)
+
+                    
+           } catch (error) {
+               console.error('Error fetching user data:', error);
+           }
+       }
+
+       fetchUserData();
+   },[authuserID]);
     console.log("profiles", profileData);
 
     return (

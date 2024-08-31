@@ -1,6 +1,10 @@
 import mongoose from "mongoose";
 
 const fileSchema= new mongoose.Schema({
+    authuserid:{
+        type:mongoose.Schema.Types.ObjectId,
+        ref:"userAuth",
+    },
     Firstname:{
         type:String,
         required:true,

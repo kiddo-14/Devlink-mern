@@ -5,7 +5,10 @@ import './index.css'
 import Personal from './components/Personal-info.jsx';
 import Links from './components/Links.jsx';
 import Preview from './components/Preview.jsx';
-import { createBrowserRouter,RouterProvider } from "react-router-dom";
+import { createBrowserRouter,RouterProvider } from 
+"react-router-dom";
+import Signup from './components/Signup.jsx';
+import Login from './components/Login.jsx';
 
 const appRouter= createBrowserRouter([
 
@@ -27,6 +30,15 @@ const appRouter= createBrowserRouter([
     path:"/preview",
     element:<Preview/>
   },
+  {
+    path:"/signup",
+    element:<Signup/>
+  },
+  {
+    path:"/login",
+    element:<Login/>
+  },
+
  
 ]);
 

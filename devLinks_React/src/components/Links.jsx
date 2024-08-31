@@ -14,32 +14,70 @@ const Links = () => {
   const [nextId, setNextId] = useState(1);
   const [emails, setEmails] = useState([]);
   const [selectedEmail, setSelectedEmail] = useState('');
+  const [authuserID,setAuthuserid]=useState(null);  
   const [userid, setUserid] = useState([]);
 
   useEffect(() => {
-    const fetchUserData = async () => {
-      try {
-        const response = await fetch(`${BASE_URL}/api/v1/alluser`);
-        if (!response.ok) {
-          throw new Error('Failed to fetch user data');
-        }
-        const result = await response.json();
-        const profiles = result.data || [];
-        
-        const emailList = profiles.map(profile => profile.email);
-        setEmails(emailList);
-        if (emailList.length > 0) {
-          setSelectedEmail(emailList[0]);
-        } else {
-          setSelectedEmail('no-data');
-        }
-      } catch (error) {
-        console.error('Error fetching user data:', error);
-        setSelectedEmail('no-data'); 
-      }
-    };
-    fetchUserData();
-  }, []);
+
+    setAuthuserid(localStorage.getItem("authuserid"));
+    console.log(authuserID);
+   const fetchUserData = async () => {
+       if (!authuserID) return;
+
+       try {
+           // Pass the id as a query parameter in the URL
+           const response = await fetch(`${BASE_URL}/api/v1/authuserid?id=${authuserID}`, {
+               method: 'GET', 
+               headers: {
+                   'Content-Type': 'application/json',
+                   // 'Authorization': 'Bearer '
+               },
+           });
+
+           if (!response.ok) {
+               throw new Error('Failed to fetch user data');
+           }
+
+           const result = await response.json();
+           console.log(result);
+
+           const profiles = result.data.profiles;
+           console.log("profiles",profiles);
+
+           const fetchEmailForUser = async (userId) => {
+               try {
+                 const response = await fetch(`${BASE_URL}/api/v1/getemail?id=${userId}`,{
+                   method: 'GET', 
+                   headers: {
+                       'Content-Type': 'application/json',
+                       // 'Authorization': 'Bearer '
+                   },
+               });
+               // console.log("response",response);
+                 const result= await response.json(); 
+                 console.log("result",result);
+                 return result.data;
+               } catch (error) {
+                 console.error(`Error fetching email for user ID ${userId}:`, error);
+               
+               }
+             };
+           //   let emailarr=[];
+             const emailArr = await Promise.all(
+               profiles.map(async (userId) => {
+                   const email = await fetchEmailForUser(userId);
+                   return email;
+               })
+           );
+                 console.log(emailArr, "email kajfgh");
+                setEmails(emailArr);
+       } catch (error) {
+           console.error('Error fetching user data:', error);
+       }
+   }
+
+   fetchUserData();
+},[authuserID]);
 
   useEffect(() => {
     const fetchProfileData = async () => {
@@ -90,40 +128,57 @@ const Links = () => {
   }, [selectedEmail]);
 
   // Add a new link to the links array
+
+  // const addLink = () => {
+  //   if (selectedEmail === '') {
+  //     alert('Please select a valid email before adding a link.');
+  //     return;
+  //   }
+  //   if (selectedEmail === 'no-data') {
+  //     alert('No profile exists. Create a profile first.');
+  //     return;
+  //   }
+
+  //   setLinks([
+  //     ...links,
+  //     {
+  //       id: nextId,
+  //       platform: "",
+  //       url: "",
+  //       email: selectedEmail
+  //     }
+  //   ]);
+  //   setNextId(nextId + 1);
+  // };
   const addLink = () => {
     if (selectedEmail === '') {
-      alert('Please select a valid email before adding a link.');
-      return;
+        alert('Please select a valid email before adding a link.');
+        return;
     }
     if (selectedEmail === 'no-data') {
-      alert('No profile exists. Create a profile first.');
-      return;
+        alert('No profile exists. Create a profile first.');
+        return;
     }
 
     setLinks([
-      ...links,
-      {
-        id: nextId,
-        platform: "",
-        url: "",
-        email: selectedEmail
-      }
+        ...links,
+        {
+            id: nextId,
+            platform: "",
+            url: "",
+            email: selectedEmail,
+            isNew: true  // Mark this link as new
+        }
     ]);
     setNextId(nextId + 1);
-  };
+};
 
-  // Remove a link from the links array
-  // const removeLink = (id) => {
-    
-  //   setLinks(links.filter(link => link.id !== id));
-  //   console.log("links",links);
 
-  // }; 
   const removeLinkfromdb = async (id) => {
     console.log("Link ID:", id);
     const updatedLinks = links.filter(link => link._id !== id);
     setLinks(updatedLinks);
-
+    alert('this link is deleted');
     try {
         const response = await fetch(`${BASE_URL}/api/v1/dltlink`, {
             method: 'DELETE',
@@ -177,34 +232,70 @@ const Links = () => {
   };
 
   // Save the details to the database
+  // const saveDetails = async () => {
+  //   try {
+  //     if (!userid) {
+  //       alert('User ID is missing.');
+  //       return;
+  //     }
+  //     for (const link of links) {
+  //       const { platform, url } = link;
+  //       const response = await fetch(`${BASE_URL}/api/v1/addlink`, {
+  //         method: 'POST',
+  //         headers: {
+  //           'Content-Type': 'application/json',
+  //         },
+  //         body: JSON.stringify({ userid, platform, url }),
+  //       });
+  //       const data = await response.json();
+
+  //       if (!response.ok || !data.success) {
+  //         alert(`Failed to save link: ${data.message}`);
+  //         return; 
+  //       }
+  //     }
+  //     alert('Profile details including links saved successfully!');
+  //   } catch (error) {
+  //     console.error('Error saving profile details:', error);
+  //     alert('An error occurred while saving the profile details.');
+  //   }
+  // };
   const saveDetails = async () => {
     try {
-      if (!userid) {
-        alert('User ID is missing.');
-        return;
-      }
-      for (const link of links) {
-        const { platform, url } = link;
-        const response = await fetch(`${BASE_URL}/api/v1/addlink`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({ userid, platform, url }),
-        });
-        const data = await response.json();
-
-        if (!response.ok || !data.success) {
-          alert(`Failed to save link: ${data.message}`);
-          return; 
+        if (!userid) {
+            alert('User ID is missing.');
+            return;
         }
-      }
-      alert('Profile details including links saved successfully!');
+
+        // Filter only the new links that need to be saved
+        const newLinks = links.filter(link => link.isNew);
+
+        for (const link of newLinks) {
+            const { platform, url } = link;
+            const response = await fetch(`${BASE_URL}/api/v1/addlink`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ userid, platform, url }),
+            });
+            const data = await response.json();
+
+            if (!response.ok || !data.success) {
+                alert(`Failed to save link: ${data.message}`);
+                return; 
+            }
+
+            // After successful save, remove the isNew flag
+            link.isNew = false;
+        }
+
+        alert('Profile details including links saved successfully!');
     } catch (error) {
-      console.error('Error saving profile details:', error);
-      alert('An error occurred while saving the profile details.');
+        console.error('Error saving profile details:', error);
+        alert('An error occurred while saving the profile details.');
     }
-  };
+};
 
   return (
     <div className="p-4 border rounded">
