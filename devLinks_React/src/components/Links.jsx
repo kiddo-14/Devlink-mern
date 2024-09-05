@@ -15,10 +15,9 @@ const Links = () => {
   const [emails, setEmails] = useState([]);
   const [selectedEmail, setSelectedEmail] = useState('');
   const [authuserID,setAuthuserid]=useState(null);  
-  const [userid, setUserid] = useState([]);
+  const [userid, setUserid] = useState();
 
   useEffect(() => {
-
     setAuthuserid(localStorage.getItem("authuserid"));
     console.log(authuserID);
    const fetchUserData = async () => {
@@ -90,19 +89,23 @@ const Links = () => {
         const profiles = result.data || [];
 
         const selectedProfile = profiles.find(profile => profile.email === selectedEmail);
-
+        console.log("selectedProfile",selectedProfile);
         if (selectedProfile) {
-          setUserid(selectedProfile._id);
-
+          /*******************************************MERN**************************************/
+          // setUserid(selectedProfile._id);
+          /*******************************************PERN**************************************/
+          setUserid(selectedProfile.userid);
+          
           const linkResponse = await fetch(`${BASE_URL}/api/v1/alllinks`);
           if (!linkResponse.ok) {
             throw new Error('Failed to fetch links data');
           }
           const linkResult = await linkResponse.json();
           const allLinks = linkResult.data || [];
-
-          const filteredLinks = allLinks.filter(link => selectedProfile.links.includes(link._id));
-          
+          /*******************************************MERN**************************************/
+          // const filteredLinks = allLinks.filter(link => selectedProfile.links.includes(link._id));
+          /*******************************************PERN**************************************/
+          const filteredLinks = allLinks.filter(link => selectedProfile?.links?.includes(link.linkid));          
           setLinks(filteredLinks);
           setNextId(filteredLinks.length + 1);
         } else {
@@ -117,7 +120,7 @@ const Links = () => {
         setNextId(1);
       }
     };
-
+    
     if (selectedEmail) {
       fetchProfileData();
     } else {
@@ -127,15 +130,18 @@ const Links = () => {
     }
   }, [selectedEmail]);
 
+  console.log("links",links);
+  // console.log("userid",userid)
+  
   // Add a new link to the links array
-
+  
   // const addLink = () => {
-  //   if (selectedEmail === '') {
-  //     alert('Please select a valid email before adding a link.');
-  //     return;
-  //   }
-  //   if (selectedEmail === 'no-data') {
-  //     alert('No profile exists. Create a profile first.');
+    //   if (selectedEmail === '') {
+      //     alert('Please select a valid email before adding a link.');
+      //     return;
+      //   }
+      //   if (selectedEmail === 'no-data') {
+        //     alert('No profile exists. Create a profile first.');
   //     return;
   //   }
 
@@ -176,9 +182,11 @@ const Links = () => {
 
   const removeLinkfromdb = async (id) => {
     console.log("Link ID:", id);
-    const updatedLinks = links.filter(link => link._id !== id);
+    // const updatedLinks = links.filter(link => link._id !== id);--------MERN
+    const updatedLinks = links.filter(link => link.linkid !== id);
     setLinks(updatedLinks);
     alert('this link is deleted');
+    console.log("Updatedlinks",updatedLinks);
     try {
         const response = await fetch(`${BASE_URL}/api/v1/dltlink`, {
             method: 'DELETE',
@@ -195,6 +203,7 @@ const Links = () => {
         console.log("delted link",result);
         if (response.ok) {
             console.log("Link deleted successfully:", result.data);
+
         } else {
             console.error("Failed to delete link:", result.message);
             alert(`Error: ${result.message}`);
@@ -262,6 +271,7 @@ const Links = () => {
   // };
   const saveDetails = async () => {
     try {
+      // console.log("userid",userid);
         if (!userid) {
             alert('User ID is missing.');
             return;
@@ -339,7 +349,10 @@ const Links = () => {
                 <p>Link #{index + 1}</p>
                 <button
                   className="text-gray-500 text-center p-2 text-md"
-                  onClick={() => {removeLinkfromdb(link._id);}}
+                  // onClick={() => {removeLinkfromdb(link._id);--->MERN}
+                  onClick={() => {removeLinkfromdb(link.linkid);}
+                  
+                }
                 
                   >
                   Remove

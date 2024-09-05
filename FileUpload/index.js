@@ -6,6 +6,7 @@ import cloudinaryConnect from "./config/cloudinary.js";
 import upload from './routes/FileUpload.js';
 import cors from 'cors';
 import cookieParser from "cookie-parser";
+import pool from "./config/post-db.js";
 
 configDotenv();
 //APP create
@@ -25,7 +26,20 @@ app.use(fileUpload({
     tempFileDir : '/tmp/'
 }));
 
-dbconnect();
+// to connect with mongo db
+//dbconnect();
+
+// to connect with postgress
+console.log("using postgrss");
+pool.connect((err, client, release) => {
+    if (err) {
+        console.error('Error acquiring client', err.stack);
+    } else {
+        console.log('Database connected successfully');
+        release();
+    }
+});
+
 cloudinaryConnect();
 
 app.use('/api/v1',upload);

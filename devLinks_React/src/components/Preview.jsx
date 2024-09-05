@@ -27,16 +27,17 @@ const getPlatformColor = (platformName) => {
             return '#808080';
     }
 };
+  
+
 
 const Preview = () => {
     const [profileData, setProfileData] = useState([]);
-    const [linkData, setLinkData] = useState({});
+    // const [linkData, setLinkData] = useState({});
     const [authuserID,setAuthuserid]=useState(null);  
-
-   
+    const [email,setemail]=useState();
 
     useEffect(() => {
-
+       console .log("Entering into preview page");
         setAuthuserid(localStorage.getItem("authuserid"));
         console.log(authuserID);
        const fetchUserData = async () => {
@@ -44,8 +45,8 @@ const Preview = () => {
 
            try {
                // Pass the id as a query parameter in the URL
-               const response = await fetch(`${BASE_URL}/api/v1/authuserid?id=${authuserID}`, {
-                   method: 'GET', 
+                const response = await fetch(`${BASE_URL}/api/v1/authuserid?id=${authuserID}`, {
+                method: 'GET', 
                    headers: {
                        'Content-Type': 'application/json',
                        // 'Authorization': 'Bearer '
@@ -57,7 +58,7 @@ const Preview = () => {
                }
 
                const result = await response.json();
-               console.log(result);
+               console.log("result of API call",result);
 
                const profiles = result.data.profiles;
                console.log("profiles",profiles);
@@ -100,27 +101,50 @@ const Preview = () => {
                  };
 
 
-               
-                 const profiledetailsArr = await Promise.all(
-                   profiles.map(async (userId) => {
-                       const profieldetail = await fetchprofilesForauthUser(userId);
+               /*mern*/
+            //      const profiledetailsArr = await Promise.all(
+            //        profiles.map(async (userId) => {
+            //            const profieldetail = await fetchprofilesForauthUser(userId);
                         
-                       /********************************************************** */
-                       const profilelinks =profieldetail.links;
+            //            /********************************************************** */
+            //            const profilelinks =profieldetail.links;
 
-                       console.log("profilelinks",profilelinks);
-                             const linkdeatilsArr =await Promise.all(
-                                  profilelinks.map(async(linkId)=>{
-                                     const linkdetail =await fetchlinkdetails(linkId);
-                                      return linkdetail;
-                                  })
-                             )
-                             profieldetail.links=linkdeatilsArr;
-                        /*****************************************************/   
-                       return profieldetail;
-                   })
-               );
-                    setProfileData(profiledetailsArr)
+            //            console.log("profilelinks",profilelinks);
+            //                  const linkdeatilsArr =await Promise.all(
+            //                       profilelinks.map(async(linkId)=>{
+            //                          const linkdetail =await fetchlinkdetails(linkId);
+            //                           return linkdetail;
+            //                       })
+            //                  )
+            //                  profieldetail.links=linkdeatilsArr;
+            //             /*****************************************************/   
+            //            return profieldetail;
+            //        })
+            //    );
+                /*PERN*/    
+            const profiledetailsArr = await Promise.all(
+                profiles?.map(async (userId) => {
+                    // Fetch profile details
+                    const profieldetail = await fetchprofilesForauthUser(userId);                    
+                    /**********************************************************/
+                    const profilelinks = profieldetail?.links || [];
+                    
+                    console.log("profilelinks", profilelinks);
+                    const linkdetailsArr = await Promise.all(
+                        profilelinks?.map(async (linkId) => {
+                            // Fetch link details
+                            const linkdetail = await fetchlinkdetails(linkId);
+                            return linkdetail;
+                        })
+                    );
+                    profieldetail.links = linkdetailsArr;
+                    /*****************************************************/
+                    
+                    return profieldetail;
+                }) || []
+            );
+            
+            setProfileData(profiledetailsArr)
 
                     
            } catch (error) {
@@ -131,6 +155,36 @@ const Preview = () => {
        fetchUserData();
    },[authuserID]);
     console.log("profiles", profileData);
+    const handleShare=async()=>{
+          if(!email){
+             return alert('Enter the email to first...');
+          }
+        try{
+           console.log("entering in handleshare function");
+               const response =await fetch(`${BASE_URL}/api/v1/shareProfile`,
+                  { method: 'POST',
+                   credentials: 'include',
+                   headers: {
+                     'Content-Type': 'application/json',
+                   },
+                   body: JSON.stringify({ email, profileData })
+                 });
+                 
+                 console.log("Successfully called API");
+                 if (response.ok) {
+                        console.log("Succesfully able to send the email");
+                        alert(`Profiles are share to this mail id: ${email} `)
+                   } else {
+                        console.log("Not able to share the profiles via the email")                  ;      
+                        alert("Not able to share the profiles via the email");                  ;      
+                 }                  
+        }
+        catch(err){
+           console.error(err);
+           console.log(err);
+           alert("Not able to Share Profiles!!Try again...")
+        }
+    }
 
     return (
         <>
@@ -161,7 +215,8 @@ const Preview = () => {
                                     <div className="flex flex-col border rounded-3xl h-full w-full bg-white">
                                         <img
                                             id="preview-photo"
-                                            src={profile.imageUrl || ""}
+                                            // src={profile.imageUrl || ""}-------------->MERN
+                                            src={profile.imageurl || ""}
                                             alt="img"
                                             className="border w-24 h-24 rounded-full mx-auto mt-4 bg-gray-100"
                                         />
@@ -170,7 +225,9 @@ const Preview = () => {
                                                 id="preview-name"
                                                 className="mt-4 h-fit w-48 text-center font-bold text-md rounded-md mx-auto bg-gray-100"
                                             >
-                                                {`${profile.Firstname} ${profile.Lastname}`}
+                                            
+                                                {/* {`${profile.Firstname} ${profile.Lastname}`} -------MERN*/}
+                                                {`${profile.firstname} ${profile.lastname}`/*PERN*/}
                                             </p>
                                             <p
                                                 id="preview-email"
@@ -223,10 +280,24 @@ const Preview = () => {
                     ) : (
                         <p className="text-center text-gray-500">No profiles available</p>
                     )}
+                    
                 </div>
+
+                <div className="w- fit flex-col  flexjustify-center">
+                     <div className="w-fit flex mx-auto">
+
+                      <label for="email" class="block mb-2 text-sm font-medium w-fit text-gray-900 dark:text-white ">Enter the email</label>
+                      <input type="email" name="email" id="email" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="name@gmail.com" required=""
+                      onChange={(e)=>setemail(e.target.value)}/>
+                      </div>
+                      <div className="w-fit mx-auto mt-3">
+
+                      <button  class="w-full mx-auto p-4 bg-primary-600 hover:bg-primary-700 focus:ring-4 focus:outline-none focus:ring-primary-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800"
+                      onClick={()=>handleShare()}>Share Profile</button>
+                      </div>
+                  </div>
             </main>
         </>
     );
 };
-
 export default Preview;

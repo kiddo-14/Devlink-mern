@@ -91,7 +91,7 @@ const Personal = () => {
         fetchUserData();
     },[authuserID]);
     console.log("emailListaefgds",emailList);
-   
+    console.log("window object",window); 
 
     // useEffect(() => {
     //     const fetchUserData = async () => {

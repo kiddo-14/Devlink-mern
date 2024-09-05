@@ -3,9 +3,26 @@ import express from 'express'
 const router=express.Router();
 
 import {isAuth} from '../middleware/middleware.js'
-import{profileinfoUpload,getAllUserData, addlink, deleteLink,getAllLink,login,signup,getAllauthUserData,getAuthUserByID,getUserByID,getUserdetailsByID,getlinksByID} from '../controller/upload.js'
+// import{profileinfoUpload,getAllUserData, addlink, deleteLink,getAllLink,login,signup,getAllauthUserData,getAuthUserByID,getUserByID,getUserdetailsByID,getlinksByID} from '../controller/upload.js'
+import { profileinfoUpload,getAllUserData, addlink, deleteLink,getAllLink,login,signup,getAllauthUserData,getAuthUserByID,getUserByID,getUserdetailsByID,getlinksByID,shareProfileViaMail } from '../controller/post-upload.js';
 
+/*********************************************************************************/
+// router.post("/profileUpload",profileinfoUpload);
+// router.get("/alluser",getAllUserData);
+// router.get("/allauthuser",getAllauthUserData);
+// router.get("/authuserid/",getAuthUserByID);
+// router.get("/alllinks",getAllLink);
+// router.post("/addlink",addlink);
+// router.delete("/dltlink",deleteLink)
+// router.post("/login",login);
+// router.post("/signup",signup);
+// // router.get("/profilesofAuthuser",getAllPofilesofAuthuser)
+// router.get("/getemail",getUserByID);
+// router.get("/getlink",getlinksByID);
+// router.get("/getAllProfilesOfAuthUser",getUserdetailsByID);
+/*******************************************************************************/
 
+/********************************************************************************/ 
 router.post("/profileUpload",profileinfoUpload);
 router.get("/alluser",getAllUserData);
 router.get("/allauthuser",getAllauthUserData);
@@ -18,8 +35,10 @@ router.post("/signup",signup);
 // router.get("/profilesofAuthuser",getAllPofilesofAuthuser)
 router.get("/getemail",getUserByID);
 router.get("/getlink",getlinksByID);
-
 router.get("/getAllProfilesOfAuthUser",getUserdetailsByID);
+router.post("/shareProfile",shareProfileViaMail)
+/********************************************************************************/ 
+
 
 
 // for authentication
