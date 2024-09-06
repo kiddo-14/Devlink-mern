@@ -7,6 +7,7 @@ import upload from './routes/FileUpload.js';
 import cors from 'cors';
 import cookieParser from "cookie-parser";
 import pool from "./config/post-db.js";
+import db from './config/post-db.js'
 
 configDotenv();
 //APP create
@@ -39,7 +40,35 @@ pool.connect((err, client, release) => {
         release();
     }
 });
+/***********************************************************************/
+//Using migration script
+// async function startServer() {
+//     try {
+//         // Test the Knex connection
+//         const result = await db.raw('SELECT NOW()');
+//         console.log('Database connection successful. Current time:', result.rows[0].now);
 
+//         // You can perform other database operations or migrations here
+
+//     } catch (error) {
+//         console.error('Database connection error:', error);
+//         return; // Stop the server startup if there's an error
+//     }
+
+//     // Connect to Cloudinary
+//     cloudinaryConnect();
+
+//     // Set up routes
+//     app.use('/api/v1', upload);
+
+//     // Start the server
+//     const PORT = process.env.PORT || 4000;
+//     app.listen(PORT, () => {
+//         console.log(`Server is started at ${PORT}`);
+//     });
+// }
+// startServer();
+/*************************************************************/
 cloudinaryConnect();
 
 app.use('/api/v1',upload);
