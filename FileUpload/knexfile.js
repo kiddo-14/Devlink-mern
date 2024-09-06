@@ -13,6 +13,7 @@ const config = {
   development: {
     client: 'pg',
     connection: {
+      host: 'db', 
       database: 'profieluploaddb',
       user: 'postgres',
       password: process.env.PDB_PASSWORD,

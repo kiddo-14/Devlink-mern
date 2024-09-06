@@ -15,5 +15,28 @@ services:
       dockerfile: Dockerfile
     ports:
       - "4000:4000"
+    depends_on:
+      - db  
     environment:
       - NODE_ENV=development
+      - DB_HOST=db  
+      - DB_USER=postgres
+      - DB_PASSWORD=Nikks@2825
+      - DB_NAME=profieluploaddb
+
+  db:
+    image: postgres:13-alpine
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: Nikks@2825
+      POSTGRES_DB: profieluploaddb
+    
+    volumes:
+     - devlinkswithmern_pgdata:/var/lib/postgresql/data
+    ports:
+      - '5432:5432'
+   
+ 
+volumes:
+    devlinkswithmern_pgdata:
